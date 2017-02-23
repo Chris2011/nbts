@@ -14,6 +14,38 @@
                  }
  
                  // Let the writer know we just wrote out a symbol.  The declaration emitter writer uses
+@@ -14203,7 +14210,9 @@
+         }
+ 
+         function checkMetaProperty(node: MetaProperty) {
+-            checkGrammarMetaProperty(node);
++            if (checkGrammarMetaProperty(node)) {
++                return unknownType;
++            }
+             Debug.assert(node.keywordToken === SyntaxKind.NewKeyword && node.name.text === "target", "Unrecognized meta-property.");
+             const container = getNewTargetContainer(node);
+             if (!container) {
+@@ -22269,7 +22278,8 @@
+         function checkGrammarMetaProperty(node: MetaProperty) {
+             if (node.keywordToken === SyntaxKind.NewKeyword) {
+                 if (node.name.text !== "target") {
+-                    return grammarErrorOnNode(node.name, Diagnostics._0_is_not_a_valid_meta_property_for_keyword_1_Did_you_mean_0, node.name.text, tokenToString(node.keywordToken), "target");
++                    grammarErrorOnNode(node.name, Diagnostics._0_is_not_a_valid_meta_property_for_keyword_1_Did_you_mean_2, node.name.text, tokenToString(node.keywordToken), "target");
++                    return true;
+                 }
+             }
+         }
+--- compiler/diagnosticMessages.json
++++ compiler/diagnosticMessages.json
+@@ -3233,7 +3233,7 @@
+         "category": "Error",
+         "code": 17011
+     },
+-    "'{0}' is not a valid meta-property for keyword '{1}'. Did you mean '{0}'?": {
++    "'{0}' is not a valid meta-property for keyword '{1}'. Did you mean '{2}'?": {
+         "category": "Error",
+         "code": 17012
+     },
 --- services/completions.ts
 +++ services/completions.ts
 @@ -111,6 +111,7 @@
